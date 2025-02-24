@@ -33,7 +33,7 @@ def create_agents(api_key: str):
     # Set the API key
     os.environ["OPENAI_API_KEY"] = api_key
     
-    model = OpenAIModel('gpt-4')
+    model = OpenAIModel('gpt-4o-mini')
 
     # First agent: Gathers information and asks questions
     info_gathering = Agent(
