@@ -11,12 +11,26 @@ if 'questions' not in st.session_state:
     st.session_state.questions = []
 if 'result' not in st.session_state:
     st.session_state.result = None
+if 'api_key' not in st.session_state:
+    st.session_state.api_key = None
 
 st.set_page_config(
     page_title="Decision Helper Agent",
     page_icon="🤔",
     layout="wide"
 )
+
+# Sidebar for API key
+with st.sidebar:
+    st.title("⚙️ Settings")
+    api_key = st.text_input(
+        "OpenAI API Key",
+        type="password",
+        help="Get your API key from https://platform.openai.com/account/api-keys",
+        value=st.session_state.api_key if st.session_state.api_key else "",
+    )
+    if api_key:
+        st.session_state.api_key = api_key
 
 st.title("🤔 Decision Helper Agent")
 st.markdown("""
@@ -27,11 +41,16 @@ This AI-powered tool helps you make better decisions by:
 """)
 
 def reset_state():
-    """Reset all state variables"""
+    """Reset all state variables except API key"""
     st.session_state.state = 'initial'
     st.session_state.query = ""
     st.session_state.questions = []
     st.session_state.result = None
+
+# Check for API key before allowing interaction
+if not st.session_state.api_key:
+    st.warning("⚠️ Please enter your OpenAI API key in the sidebar to continue.")
+    st.stop()
 
 # Initial query input
 if st.session_state.state == 'initial':
@@ -45,7 +64,7 @@ if st.session_state.state == 'initial':
         if query:
             st.session_state.query = query
             with st.spinner("Analyzing your query..."):
-                result = asyncio.run(process_decision(query))
+                result = asyncio.run(process_decision(query, st.session_state.api_key))
                 if result.questions:
                     st.session_state.questions = result.questions
                     st.session_state.state = 'questions'
@@ -74,6 +93,7 @@ elif st.session_state.state == 'questions':
                     with st.spinner("Processing your answers..."):
                         result = asyncio.run(process_decision(
                             st.session_state.query,
+                            st.session_state.api_key,
                             "\n".join(answers)
                         ))
                         st.session_state.result = result

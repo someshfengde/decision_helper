@@ -1,7 +1,4 @@
 import asyncio
-from dotenv import load_dotenv
-load_dotenv()
-
 from pydantic import BaseModel
 from rich import print
 from pydantic_ai import Agent, RunContext
@@ -9,6 +6,7 @@ from pydantic_ai.models.openai import OpenAIModel
 import logfire
 from duckduckgo_search import DDGS
 from typing import Optional, List
+import os
 
 logfire.configure()
 
@@ -30,39 +28,49 @@ class ProsOutput(BaseModel):
 class ConsOutput(BaseModel):
     cons: List[str]
 
-model = OpenAIModel('gpt-4o-mini')
+def create_agents(api_key: str):
+    """Create all agents with the provided API key"""
+    # Set the API key
+    os.environ["OPENAI_API_KEY"] = api_key
+    
+    model = OpenAIModel('gpt-4')
 
-# First agent: Gathers information and asks questions
-info_gathering = Agent(
-    system_prompt='''You are an expert decision helper. First, ask relevant questions to understand the situation better.
-    Keep questions focused and specific. Ask 3-5 questions that will help make a better decision.''',
-    model=model,
-    result_type=InfoGatheringOutput
-)
+    # First agent: Gathers information and asks questions
+    info_gathering = Agent(
+        system_prompt='''You are an expert decision helper. First, ask relevant questions to understand the situation better.
+        Keep questions focused and specific. Ask 3-5 questions that will help make a better decision.''',
+        model=model,
+        result_type=InfoGatheringOutput
+    )
 
-# Second agent: Analyzes pros
-pros_agent = Agent(
-    system_prompt="Based on the situation and answers provided, analyze and list the potential benefits and positive outcomes.",
-    model=model,
-    result_type=ProsOutput
-)
+    # Second agent: Analyzes pros
+    pros_agent = Agent(
+        system_prompt="Based on the situation and answers provided, analyze and list the potential benefits and positive outcomes.",
+        model=model,
+        result_type=ProsOutput
+    )
 
-# Third agent: Analyzes cons
-cons_agent = Agent(
-    system_prompt="Based on the situation and answers provided, analyze and list the potential drawbacks and risks.",
-    model=model,
-    result_type=ConsOutput
-)
+    # Third agent: Analyzes cons
+    cons_agent = Agent(
+        system_prompt="Based on the situation and answers provided, analyze and list the potential drawbacks and risks.",
+        model=model,
+        result_type=ConsOutput
+    )
 
-# Fourth agent: Makes final recommendation
-final_agent = Agent(
-    system_prompt="Based on the pros and cons analysis, provide a clear recommendation.",
-    model=model,
-    result_type=str
-)
+    # Fourth agent: Makes final recommendation
+    final_agent = Agent(
+        system_prompt="Based on the pros and cons analysis, provide a clear recommendation.",
+        model=model,
+        result_type=str
+    )
+    
+    return info_gathering, pros_agent, cons_agent, final_agent
 
-async def process_decision(query: str, answers: Optional[str] = None) -> InfoGatheringOutput:
+async def process_decision(query: str, api_key: str, answers: Optional[str] = None) -> InfoGatheringOutput:
     """Process the decision query and return either questions or final result"""
+    
+    # Create agents with the provided API key
+    info_gathering, pros_agent, cons_agent, final_agent = create_agents(api_key)
     
     # If we don't have answers yet, get questions
     if not answers:
@@ -86,4 +94,5 @@ async def process_decision(query: str, answers: Optional[str] = None) -> InfoGat
     )
 
 if __name__ == "__main__":
-    asyncio.run(process_decision(query="I want to create AI project which people will use?."))
+    api_key = os.getenv("OPENAI_API_KEY")
+    asyncio.run(process_decision(query="I want to create AI project which people will use?.", api_key=api_key))
