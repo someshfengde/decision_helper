@@ -8,7 +8,7 @@ from duckduckgo_search import DDGS
 from typing import Optional, List
 import os
 
-logfire.configure()
+logfire.configure(send_to_logfire="if-token-present")
 
 def search_internet(query: str) -> list[dict]: 
     """Searches the web for given query and returns top 5 results"""
