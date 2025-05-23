@@ -327,7 +327,7 @@ tokenizers==0.21.0
     # via cohere
 toml==0.10.2
     # via streamlit
-tornado==6.4.2
+tornado==6.5.1
     # via
     #   ipykernel
     #   jupyter-client
