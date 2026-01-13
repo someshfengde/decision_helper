@@ -71,7 +71,7 @@ executing==2.2.0
     #   stack-data
 fastavro==1.10.0
     # via cohere
-filelock==3.17.0
+filelock==3.20.3
     # via huggingface-hub
 fsspec==2025.2.0
     # via huggingface-hub
