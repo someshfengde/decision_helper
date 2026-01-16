@@ -234,7 +234,7 @@ pure-eval==0.2.3
     # via stack-data
 pyarrow==19.0.1
     # via streamlit
-pyasn1==0.6.1
+pyasn1==0.6.2
     # via
     #   pyasn1-modules
     #   rsa
