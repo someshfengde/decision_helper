@@ -220,7 +220,7 @@ platformdirs==4.3.6
     # via jupyter-core
 prompt-toolkit==3.0.50
     # via ipython
-protobuf==5.29.3
+protobuf==5.29.6
     # via
     #   googleapis-common-protos
     #   logfire
